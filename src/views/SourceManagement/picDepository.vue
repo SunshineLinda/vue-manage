@@ -33,10 +33,10 @@
 			</el-form>
 		<!--列表-->
 			<el-col class="toolbar">
-				<el-button @click="" size="small">全选</el-button>
+				<el-button size="small">全选</el-button>
 			</el-col>
 			<el-col class="toolbar" :span="24" :data="picData">
-				<div class="picList" v-for="(item,ind) in picData">
+				<div class="picList" v-for="(item,ind) in picData" :key="ind">
 					<input type="checkbox" class="checks"/>
 					<!--<el-checkbox-group v-model="checkList" class="checks">
 				   		<el-checkbox label=""></el-checkbox>
@@ -129,7 +129,8 @@
       		piclabel:"",
       	},
       	addLoading:false,
-      	addFormVisible:false,
+		addFormVisible:false,
+		formData: [], 
       	addFormRules:{
 //    		files:[{required: true, message: '请选择选择图片', trigger: 'change'}],
       		pictype:[
@@ -201,66 +202,78 @@
 			})
 		},
 		fileImage(e){
-			let len= e.target.files.length;
-			let formData = new FormData;  
+			let len= e.target.files.length; 
 			for(var i=0;i<len;i++){
-				console.log(e.target.files[i])
-				formData.append('files',e.target.files[i]); 
+				this.formData.push(e.target.files[i])
 			}
-	        formData.append('rType', '1');
-	        formData.append('rTag', 'cc');
-	        console.log((e.target.files).length)
-	            let config = {  
-                'Content-Type': 'multipart/form-data'  
-            }  
-            let var_this = this;  
-            axios.post('http://47.104.208.252/spi/resourceLib/add', formData, config)  
-                .then((res) => {
-                	this.getData()
-//                      if (!response.data.success) {  
-//                          var_this.$message({  
-//                              message: response.data.message,  
-//                              type: 'error'  
-//                          });  
-//                      }  
-                })  
-                .catch(function(error) {   
-                })  
-	        let file =e.target.files[0];
-	    		for(var i=0;i<file.length;i++){
-	        		let imgSize=file[i].size/1024;
-	        		if(imgSize>500){
-	        			alert('请上传大小不超过500KB的图片')
-	        		}else{
-	        			this.filedata=file;
-	        		}
-	    		}
+	        // formData.append('rType', '1');
+	        // formData.append('rTag', 'cc');
+	        // console.log((e.target.files).length)
+	        //     let config = {  
+            //     'Content-Type': 'multipart/form-data'  
+            // }  
+			// let var_this = this;
+			console.log(this.formData)
+//             axios.post('http://47.104.208.252/spi/resourceLib/add', formData, config)  
+//                 .then((res) => {
+//                 	this.getData()
+// //                      if (!response.data.success) {  
+// //                          var_this.$message({  
+// //                              message: response.data.message,  
+// //                              type: 'error'  
+// //                          });  
+// //                      }  
+//                 })  
+//                 .catch(function(error) {   
+//                 })  
+// 	        let file =e.target.files[0];
+// 	    		for(var i=0;i<file.length;i++){
+// 	        		let imgSize=file[i].size/1024;
+// 	        		if(imgSize>500){
+// 	        			alert('请上传大小不超过500KB的图片')
+// 	        		}else{
+// 	        			this.filedata=file;
+// 	        		}
+// 	    		}
 	},
 			//新增
 	addSubmit: function () {
+		let formData = new FormData(); 
+		for (const i of this.formData) {
+			formData.append('files',this.formData[i]);
+
+			formData.append(`test${i}`, this.formData[i]);
+			
+		}
+		formData.append('rType', '1');
+		formData.append('rTag', 'cc');
+		let config = {  
+			'Content-Type': 'multipart/form-data'  
+		}
 		this.$refs.addForm.validate((valid) => {
 			if (valid) {
 				this.$confirm('确认提交吗？', '提示', {}).then(() => {
 					this.addLoading = true;
-					console.log(this.filedata)
 //							let para = Object.assign({}, this.addForm);
 					let config = {  
 	                    'Content-Type': 'multipart/form-data'  
-	                }  
-					picSourceupload({
-						"rType":this.addForm.pictype,"files":this.filedata,"rTag":this.addForm.piclabel
-					}).then((res) => {
-						console.log(res)
-						this.addLoading = false;
-						//NProgress.done();
-						this.$message({
-							message: '提交成功',
-							type: 'success'
-						});
-						this.$refs['addForm'].resetFields();
-						this.addFormVisible = false;
-						this.getData();
-					});
+					} 
+					console.log(formData.has('files')) //检测是否添加成功 
+					axios.post('http://47.104.208.252/spi/resourceLib/add', formData, config) 
+					// picSourceupload({
+					// 	"rType":this.addForm.pictype,"files":this.filedata,"rTag":this.addForm.piclabel
+					// }).then((res) => {
+					// 	console.log(res)
+					// 	this.addLoading = false;
+					// 	//NProgress.done();
+					// 	this.$message({
+					// 		message: '提交成功',
+					// 		type: 'success'
+					// 	});
+					// 	this.$refs['addForm'].resetFields();
+					// 	this.addFormVisible = false;
+					// 	this.getData();
+					// });
 				});
 			}
 		});
