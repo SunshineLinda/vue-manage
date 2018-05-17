@@ -125,7 +125,7 @@
 <script>
 	import util from '../../common/js/util'
 	//import NProgress from 'nprogress'
-	import { getUserListPage } from '../../api/api';
+	import { getUserListPage, carbrand } from '../../api/api';
 	export default {
 		data() {
 			return {
@@ -193,11 +193,11 @@
 				console.log('submit!');
 			},
 			getData(){
-				carbrand(
-					{"articleId":1}
-				).then(res => {
-					console.log(res)
-				})
+				// carbrand(
+				// 	{"articleId":1}
+				// ).then(res => {
+				// 	console.log(res)
+				// })
 			},
 			//获取用户列表
 			getUsers() {

@@ -1,7 +1,6 @@
 <template>
-	<section>
+	<section style="width:100%">
 		<!--列表-->
-			<!--工具条-->
 		<el-col class="toolbar" style="padding-bottom: 0px;">
 			<el-form :inline="true" :model="filters">
 				<el-form-item>
@@ -29,9 +28,9 @@
 			</el-col>
 			<el-col class="toolbar" :span="24" :data="picData">
 				<div class="picList" v-for="(item,ind) in picData" :key="ind">
-					<input type='checkbox' name='checkboxinput' class='input-checkbox checks' v-model='selectArr' :value='item.rId'>
+					<input type='checkbox' name='checkboxinput' class='input-checkbox checks' :checked="item.checked" disabled>
 					<div class="picBox">
-						<img :src="item.link" alt="展示图" />
+						<img :src="item.link" @click="getPic(item,ind)" alt="展示图" />
 						<span class="del" @click="delImg(ind,item.rId)">删除</span>
 					</div>
 					<div class="picInfo">
@@ -50,7 +49,7 @@
 			    </el-pagination>
 		    </el-col>
 		</el-col>
-		<el-dialog title="新增" v-model="addFormVisible" :visible.sync="addFormVisible" :close-on-click-modal="false">
+		<el-dialog append-to-body title="新增" v-model="addFormVisible" :visible.sync="addFormVisible" :close-on-click-modal="false">
 			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
 				<el-form-item prop="files" id="uploadForm">
 					<input 
@@ -82,73 +81,77 @@
 </template>
 
 <script>
-	import util from '../../common/js/util';
+	import util from '../common/js/util';
 	import axios from 'axios';
 	import Qs from 'qs';
-	import {picSource,picSourceupload, delPic,removeUser, batchRemoveUser, editUser, addUser } from '../../api/api';
-	
+	import {picSource,picSourceupload, delPic,removeUser, batchRemoveUser, editUser, addUser } from '../api/api';
+
 	export default {
-		    data() {
-      return {
-      	options:[{
-      		value:"1",
-      		label:"图片"
-      	},{
-      		value:"2",
-      		label:"视频"
-      	}
-      		
-      	],
-      	rId:"",
-      	picType:"",
-      	picData: [],
-		sels: [],//列表选中列
-		checked:false,
-		checkboxModel:[],
-		selectArr:[],
-        checked: false, //全选框
-        checkList: [],
-		checkList:[],
-		filelen:0,
-		files:"",
-		filters:{
-			name:'',
-		},
-		listLoading: false,
-		total: 0,
-		page: 1,
-		pagesize:30,
-		checke:true,
-		addForm:{
-			files:"",
-      		pictype:"",
-      		piclabel:"",
-      	},
-      	addLoading:false,
-		addFormVisible:false,
-		formData: [], 
-      	addFormRules:{
-//    		files:[{required: true, message: '请选择选择图片', trigger: 'change'}],
-      		pictype:[
-				{ required: true, message: '请输入选择图片分类', trigger: 'change' }
-			],
-      		piclabel:[
-				{ required: true, message: '请输入标签名称', trigger: 'blur' }
-			]
+		name:'bydialog',
+		props:[],
+		//props:['list'],
 			
+//          picLink:item.link,
+//          listType:Number,
+//          index:Number,
+//          length:Number,
+//          list:Array,
+//          industryIds:Array,
+//          PromiseLists:Array,
+//          PromiseListIndex:Array
+      
+		data() {
+		  return {
+		  	options:[{
+		  		value:"1",
+		  		label:"图片"
+		  	},{
+		  		value:"2",
+		  		label:"视频"
+		  	}
+		  		
+			  ],
+			imgItem:[],
+			checked:true,
+		  	rId:"",
+		  	picArr:[],
+		  	picType:"",
+		  	picData: [],
+			sels: [],//列表选中列
+			checkboxModel:[],
+			selectArr:[],
+			checke:false,
+		    checked: false, //全选框
+		    checkList: [],
+			filelen:0,
+			files:"",
+			filters:{
+				name:'',
 			},
-//      handleAdd:function(){
-////			this.addFormVisible = true;
-//			this.addForm = {
-//				name: '',
-//				sex: -1,
-//				age: 0,
-//				birth: '',
-//				addr: ''
-//			};
-//		}
-      };
-    },
+			listLoading: false,
+			total: 0,
+			page: 1,
+			pagesize:30,
+			addForm:{
+				files:"",
+		  		pictype:"",
+		  		piclabel:"",
+		  	},
+		  	addLoading:false,
+			addFormVisible:false,
+			formData: [], 
+		  	addFormRules:{
+		//    		files:[{required: true, message: '请选择选择图片', trigger: 'change'}],
+		  		pictype:[
+					{ required: true, message: '请输入选择图片分类', trigger: 'change' }
+				],
+		  		piclabel:[
+					{ required: true, message: '请输入标签名称', trigger: 'blur' }
+				]
+				
+				}
+		  };
+	},
     methods: {
 		checkedAll() {
             if(!event.currentTarget.checked) {
@@ -159,6 +162,22 @@
                     this.selectArr.push(item.rId);
                 });
             }
+		},
+        getPic(item,ind){
+			let _mData =JSON.parse( JSON.stringify(this.picData));
+				_mData[ind].checked = _mData[ind].checked ? false :'checked'
+				this.picData = _mData;
+				if(_mData[ind].checked) {
+					this.imgItem.push(item.link)
+				}else {
+					var index = this.imgItem.indexOf(item.link);
+					if (index > -1) {
+						this.imgItem.splice(index, 1);
+					}
+				}
+				this.$emit('childevent' , this.imgItem)
+				this.$store.state.imgItem = this.imgItem;
+
         },
 		handleCurrentChange(val) {
 			this.page = val;
@@ -205,13 +224,82 @@
 			this.sels = sels;
 		},
 		getData(){
-			picSource(
-				{"pageNum":this.page,"pageSize":this.pagesize,"rType":1}
-			).then(res => {
-				this.total = res.data.result.total;
-				this.picData=res.data.result.list;
+
+			let mock = {
+				"code":200,
+				"msg":"",
+				"result":{
+					"endRow":25,
+					"firstPage":1,
+					"hasNextPage":false,
+					"hasPreviousPage":false,
+					"isFirstPage":true,
+					"isLastPage":true,
+					"lastPage":1,
+					"list":[
+						{
+							"cTime":1526461590000,
+							"link":"http://s.img.owlcar.com/20180516/1526461590615.png",
+							"rId":186,
+							"rTag":"3",
+							"rType":1,
+							"sysUserId":1
+						},
+						{
+							"cTime":1526462939000,
+							"link":"http://s.img.owlcar.com/20180516/1526462939682.png",
+							"rId":190,
+							"rTag":"嗯嗯",
+							"rType":1,
+							"sysUserId":1
+						},
+						{
+							"cTime":1526462939000,
+							"link":"http://s.img.owlcar.com/20180516/1526462939706.png",
+							"rId":192,
+							"rTag":"嗯嗯",
+							"rType":1,
+							"sysUserId":1
+						},
+						{
+							"cTime":1526462939000,
+							"link":"http://s.img.owlcar.com/20180516/1526462939728.png",
+							"rId":194,
+							"rTag":"嗯嗯",
+							"rType":1,
+							"sysUserId":1
+						},
+						{
+							"cTime":1526462939000,
+							"link":"http://s.img.owlcar.com/20180516/1526462939739.jpg",
+							"rId":195,
+							"rTag":"嗯嗯",
+							"rType":1,
+							"sysUserId":1
+						},
+						{
+							"cTime":1526464276000,
+							"link":"http://s.img.owlcar.com/20180516/1526464276524.jpg",
+							"rId":196,
+							"rTag":"333",
+							"rType":1,
+							"sysUserId":1
+						}
+					]
+				}
+			}	
+		this.total = mock.result.total;
+		this.picData = mock.result.list
+		this.picData.map((i,v)=>{
+			i.checked = false;
+		})
+			// picSource(
+			// 	{"pageNum":this.page,"pageSize":this.pagesize,"rType":1}
+			// ).then(res => {
+			// 	this.total = res.data.result.total;
+			// 	this.picData=res.data.result.list;
 				
-			})
+			// })
 		},
 		fileImage(e){
 			this.filelen= e.target.files.length; 
@@ -285,7 +373,10 @@
             }else{    
                 this.checked = false    
             }    
-        }    
+		} ,
+		picData() {
+			console.log('操作图片')
+		}   
     },    
     created(){
 //  		this.getData();

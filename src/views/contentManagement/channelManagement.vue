@@ -31,8 +31,8 @@
 
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
-			<el-button @click="" :disabled="this.sels.length===0">恢复</el-button>
-			<el-button type="danger" @click="" :disabled="this.sels.length===0">禁用</el-button>
+			<el-button :disabled="this.sels.length===0">恢复</el-button>
+			<el-button type="danger" :disabled="this.sels.length===0">禁用</el-button>
 			<el-button type="danger" @click="batchRemove" :disabled="this.sels.length===0">批量删除</el-button>
 		</el-col>
 
