@@ -206,6 +206,8 @@
 			for(var i=0;i<len;i++){
 				this.formData.push(e.target.files[i])
 			}
+			//formData.append('files',e.target.files[i]); 
+			console.log(this.formData)
 	        // formData.append('rType', '1');
 	        // formData.append('rTag', 'cc');
 	        // console.log((e.target.files).length)
@@ -213,7 +215,6 @@
             //     'Content-Type': 'multipart/form-data'  
             // }  
 			// let var_this = this;
-			console.log(this.formData)
 //             axios.post('http://47.104.208.252/spi/resourceLib/add', formData, config)  
 //                 .then((res) => {
 //                 	this.getData()
@@ -239,11 +240,8 @@
 			//新增
 	addSubmit: function () {
 		let formData = new FormData(); 
-		for (const i of this.formData) {
-			formData.append('files',this.formData[i]);
-
-			formData.append(`test${i}`, this.formData[i]);
-			
+		for (var i=0;i<this.formData.length;i++) {
+			formData.append('files'+i,this.formData[i]);	
 		}
 		formData.append('rType', '1');
 		formData.append('rTag', 'cc');
@@ -259,7 +257,12 @@
 	                    'Content-Type': 'multipart/form-data'  
 					} 
 					console.log(formData.has('files')) //检测是否添加成功 
-					axios.post('http://47.104.208.252/spi/resourceLib/add', formData, config) 
+					$.ajax({
+						methods:'post',
+						url:'http://47.104.208.252/spi/resourceLib/add',
+						data: formData
+					})
+					//axios.post('http://47.104.208.252/spi/resourceLib/add', formData, config) 
 					// picSourceupload({
 					// 	"rType":this.addForm.pictype,"files":this.filedata,"rTag":this.addForm.piclabel
 					// }).then((res) => {

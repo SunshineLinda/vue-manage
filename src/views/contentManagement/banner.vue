@@ -125,7 +125,7 @@
 <script>
 	import util from '../../common/js/util'
 	//import NProgress from 'nprogress'
-	import { getUserListPage,carbrand } from '../../api/api';
+	import { getUserListPage } from '../../api/api';
 	export default {
 		data() {
 			return {
