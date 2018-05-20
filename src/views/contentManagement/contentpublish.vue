@@ -110,65 +110,58 @@
 
 		<!--新增界面-->
 		<el-dialog title="新增" v-model="addFormVisible" :visible.sync="addFormVisible" :close-on-click-modal="false" style="width:80%">
-			<el-dialog  width="100%" :visible.sync="innerVisible" append-to-body>
-		   	  <Bydialog @childevent="childEventHandler"></Bydialog>
-		    </el-dialog>
-			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-			    <el-form-item label="类型" prop="bizType">
-					<el-select v-model="addForm.bizType" filterable placeholder="类型">
-					    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
-					</el-select>
-				</el-form-item>
-				<el-form-item label="标题" prop="title">
-					<el-input v-model="addForm.title" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="海报" prop="poster">
-					<p @click="innerVisible = true">+</p>
-					<img :src="item" alt="" v-for="item in imglist" :key="item" style="width:50px;height:50px;padding-right:10px;">
-				</el-form-item>
-				<el-form-item label="简介" prop="brief">
-					<el-input v-model="addForm.brief" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="时长" prop="duration">
-					<el-input v-model="addForm.duration" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="来源" prop="source">
-					<el-input v-model="addForm.source" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="视频地址" prop="videoUrl">
-					<el-input v-model="addForm.videoUrl" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="视频ID" prop="vid">
-					<el-input v-model="addForm.vid" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="系列名" prop="name">
-					<el-select v-model="value8" filterable placeholder="系列名">
-						<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
-					</el-select>
-				</el-form-item>
-				<el-form-item label="选择标签" prop="chooseLable" :data="taglist">
-				    <el-checkbox-group v-model="addForm.chooseLable">
-				        <el-checkbox-button v-for="(item,ind) in taglist" :label="item.label" :key="ind">{{item.name}}</el-checkbox-button>
-				    </el-checkbox-group>
-				</el-form-item>
-				<el-form-item label="关联车系" prop="aboutCarSystem" :data="CarSeries">
-				    <el-checkbox-group v-model="addForm.aboutCarSystem">
-				        <el-checkbox-button v-for="(item,ind) in CarSeries" :label="item.label" :key="ind">{{item.name}}</el-checkbox-button>
-				    </el-checkbox-group>
-				</el-form-item>
-				<el-form-item label="图标" prop="logo">
-					<el-upload
-					  class="avatar-uploader"
-					  action="https://jsonplaceholder.typicode.com/posts/"
-					  :show-file-list="false"
-					  :on-success="handleAvatarSuccess"
-					  :before-upload="beforeAvatarUpload">
-					  <img v-if="imageUrl" :src="imageUrl" class="avatar">
-					  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-					</el-upload>
-					<!--<el-input v-model="editForm.headImg" auto-complete="off"></el-input>-->
+			<span v-for="(i,ind) in options" :key="ind" >
+				<el-button @click="handleType(i)" >{{i.label}}</el-button>
+			</span>
+			<el-form :inline="true" label-width="80px">
+				<el-form-item label="标题">
+					<el-input placeholder="标题"></el-input>
 				</el-form-item>
 			</el-form>
+
+			<div v-if="tabType=='1'">
+
+					<el-dialog  width="100%" :visible.sync="innerVisible" append-to-body>
+					<Bydialog @childevent="childEventHandler"></Bydialog>
+					</el-dialog>
+				<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
+					<el-form-item label="内容">
+						<el-input
+							type="textarea"
+							:rows="2"
+							placeholder="不超过100个汉字(200个字符)"
+							v-model="textarea">
+						</el-input>
+					</el-form-item>
+
+					<el-form-item label="所属频道">
+						<el-button type="primary" @click="checkpd">选择频道</el-button>
+					</el-form-item>
+
+						
+					
+					<el-form-item label="图标" prop="logo">
+						<el-upload
+						class="avatar-uploader"
+						action="https://jsonplaceholder.typicode.com/posts/"
+						:show-file-list="false"
+						:on-success="handleAvatarSuccess"
+						:before-upload="beforeAvatarUpload">
+						<img v-if="imageUrl" :src="imageUrl" class="avatar">
+						<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+						</el-upload>
+						<!--<el-input v-model="editForm.headImg" auto-complete="off"></el-input>-->
+					</el-form-item>
+				</el-form>
+
+			</div>
+			<div v-else>
+
+				视频
+			</div>
+
+
+
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="addFormVisible = false">取消</el-button>
 				<el-button type="primary" @click.native="addSubmit" :loading="addLoading">提交</el-button>
@@ -210,6 +203,7 @@
 				imageUrl:'',
 				checked: true,
 				checke:true,
+				textarea:'',
 				sels: [],//列表选中列
 				options: [ {
 		          value: '2',
@@ -217,7 +211,10 @@
 		        }, {
 		          value: '1',
 		          label: '文章'
-		        }],
+				}],
+				tabType: 1,	
+
+
 		        bizType: '',
 		        statusvalue:"",
 		        statusoptions:[{
@@ -247,9 +244,7 @@
 				addFormVisible: false,//新增界面是否显示
 				addLoading: false,
 				addFormRules: {
-//					name: [
-//						{ required: true, message: '请输入作者名称', trigger: 'blur' }
-//					]
+
 				},
 				//新增界面数据
 				addForm: {
@@ -265,9 +260,20 @@
 				
 			}
 		},
+		watch: {
+			imglist() {}
+		},
 		methods: {
 			beforeAvatarUpload() {},
 			handleAvatarSuccess() {},
+
+			handleType(item) {
+				//alert(`${item.value}:: ${item.label}`)
+				this.tabType = item.value;
+			},
+			checkpd()　{
+				alert(`打开模态窗`)
+			},
 			//获取标签
 			getTagGroup(){
 				let para = {
@@ -306,7 +312,12 @@
 				this.getUsers();
 			},
 			childEventHandler () {
-				this.imglist = this.$store.state.imgItem
+				let _list = this.$store.state.imgItem;
+				this.imglist = [];
+				if(_list.length < 1) return;
+				for (const i in _list) {
+					this.imglist.push(_list[i])
+				}
 			},
 			//获取用户列表
 			getUsers() {

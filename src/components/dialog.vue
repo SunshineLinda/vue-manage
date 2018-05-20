@@ -49,7 +49,10 @@
 			    </el-pagination>
 		    </el-col>
 		</el-col>
-		<el-dialog append-to-body title="新增" v-model="addFormVisible" :visible.sync="addFormVisible" :close-on-click-modal="false">
+		<el-dialog append-to-body 
+		title="新增" 
+		v-model="addFormVisible" 
+		:visible.sync="addFormVisible">
 			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
 				<el-form-item prop="files" id="uploadForm">
 					<input 
@@ -171,7 +174,6 @@
 				if(Path=='/carbrandManagement' && this.imgItem.length<1){
 					if(_mData[ind].checked) {
 						this.imgItem.push(item.link);
-						console.log(item.link)
 					}else {
 						var index = this.imgItem.indexOf(item.link);
 						if (index > -1) {
@@ -188,6 +190,7 @@
 						}
 					}
 				}
+
 				this.$emit('childevent' , this.imgItem)
 				this.$store.state.imgItem = this.imgItem;
 

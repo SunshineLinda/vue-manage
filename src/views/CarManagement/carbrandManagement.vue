@@ -85,7 +85,7 @@
 				</el-form-item>
 				<el-form-item label="logo" prop="logo">
 					<p @click="innerVisible = true">+</p>
-					<img :src="item" alt="" v-for="item in imglist" :key="item" style="width:50px;height:50px;padding-right:10px;">
+					<img v-if="imglist.length != 0" :src="item" alt="" v-for="item in imglist" :key="item" style="width:50px;height:50px;padding-right:10px;">
 				</el-form-item>
 				<el-form-item label="状态" prop="state">
 					<el-select v-model="addForm.state" filterable placeholder="状态">
@@ -174,12 +174,18 @@
 		},
 		watch: {
 			imglist() {
-//				console.log(this.imglist)
+				
 			}
 		},
 		methods: {
 			childEventHandler () {
-				this.imglist = this.$store.state.imgItem
+				let _list = this.$store.state.imgItem;
+				this.imglist = [];
+				if(_list.length < 1) return;
+				for (const i in _list) {
+					this.imglist.push(_list[i])
+				}
+				
 			},
 			onSubmit() {
 				console.log('submit!');
