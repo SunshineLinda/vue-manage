@@ -55,7 +55,7 @@
 		<!--新增界面-->
 		<el-dialog title="新增" v-model="addFormVisible" :visible.sync="addFormVisible" :close-on-click-modal="false">
 			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-				<el-form-item label="频道名称" prop="name">
+				<el-form-item label="标签名称" prop="name">
 					<el-input v-model="addForm.name" auto-complete="off"></el-input>
 				</el-form-item>
 			</el-form>
@@ -75,7 +75,7 @@
 <script>
 	import util from '../../common/js/util'
 	//import NProgress from 'nprogress'
-	import { tagGroup, removeUser, batchRemoveUser, editUser, addUser } from '../../api/api';
+	import { tagGroup,tagGroupAdd, removeUser, batchRemoveUser, editUser, addUser } from '../../api/api';
 
 	export default {
 		data() {
@@ -119,9 +119,7 @@
 				},
 				//新增界面数据
 				addForm: {
-					name: '',
-					birth: '',
-					addr: ''
+					name: ''
 				}
 
 			}
@@ -172,11 +170,7 @@
 			handleAdd: function () {
 				this.addFormVisible = true;
 				this.addForm = {
-					name: '',
-					sex: -1,
-					age: 0,
-					birth: '',
-					addr: ''
+					name: ''
 				};
 			},
 			//编辑
@@ -210,9 +204,10 @@
 						this.$confirm('确认提交吗？', '提示', {}).then(() => {
 							this.addLoading = true;
 							//NProgress.start();
-							let para = Object.assign({}, this.addForm);
-							para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-							addUser(para).then((res) => {
+//							let para = Object.assign({}, this.addForm);
+							let params = new URLSearchParams();
+							params.append("name",this.addForm.name);
+							tagGroupAdd(params).then((res) => {
 								this.addLoading = false;
 								//NProgress.done();
 								this.$message({

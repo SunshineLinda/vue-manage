@@ -62,7 +62,7 @@
 			</el-table-column>
 			<el-table-column prop="name" label="推荐排序" width="120" sortable>
 			</el-table-column>
-			<el-table-column prop="sex" label="内容标题" width="200">
+			<el-table-column prop="title" label="内容标题" width="200">
 			</el-table-column>
 			<el-table-column prop="sex" label="所属频道" width="200">
 			</el-table-column>
@@ -72,7 +72,11 @@
 			</el-table-column>
 			<el-table-column prop="age" label="创作类型" width="120">
 			</el-table-column>
-			<el-table-column prop="age" label="状态" width="100">
+			<el-table-column prop="state" label="状态" width="100">
+				<template slot-scope="scope">
+					<span v-if="scope.row.state==1">启用</span>
+					<span v-if="scope.row.state==0">停用</span>
+				</template>
 			</el-table-column>
 			<el-table-column prop="age" label="发布时间" width="120">
 			</el-table-column>
@@ -105,20 +109,52 @@
 		
 
 		<!--新增界面-->
-		<el-dialog title="新增" v-model="addFormVisible" :visible.sync="addFormVisible" :close-on-click-modal="false">
+		<el-dialog title="新增" v-model="addFormVisible" :visible.sync="addFormVisible" :close-on-click-modal="false" style="width:80%">
+			<el-dialog  width="100%" :visible.sync="innerVisible" append-to-body>
+		   	  <Bydialog @childevent="childEventHandler"></Bydialog>
+		    </el-dialog>
 			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-			    <el-form-item label="品牌名" prop="brand">
-					<el-select v-model="value8" filterable placeholder="品牌">
+			    <el-form-item label="类型" prop="bizType">
+					<el-select v-model="addForm.bizType" filterable placeholder="类型">
 					    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
 					</el-select>
+				</el-form-item>
+				<el-form-item label="标题" prop="title">
+					<el-input v-model="addForm.title" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="海报" prop="poster">
+					<p @click="innerVisible = true">+</p>
+					<img :src="item" alt="" v-for="item in imglist" :key="item" style="width:50px;height:50px;padding-right:10px;">
+				</el-form-item>
+				<el-form-item label="简介" prop="brief">
+					<el-input v-model="addForm.brief" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="时长" prop="duration">
+					<el-input v-model="addForm.duration" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="来源" prop="source">
+					<el-input v-model="addForm.source" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="视频地址" prop="videoUrl">
+					<el-input v-model="addForm.videoUrl" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="视频ID" prop="vid">
+					<el-input v-model="addForm.vid" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="系列名" prop="name">
 					<el-select v-model="value8" filterable placeholder="系列名">
 						<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
 					</el-select>
 				</el-form-item>
-				<el-form-item label="车身结构" prop="structure">
-					<el-input v-model="addForm.structure" auto-complete="off"></el-input>
+				<el-form-item label="选择标签" prop="chooseLable" :data="taglist">
+				    <el-checkbox-group v-model="addForm.chooseLable">
+				        <el-checkbox-button v-for="(item,ind) in taglist" :label="item.label" :key="ind">{{item.name}}</el-checkbox-button>
+				    </el-checkbox-group>
+				</el-form-item>
+				<el-form-item label="关联车系" prop="aboutCarSystem" :data="CarSeries">
+				    <el-checkbox-group v-model="addForm.aboutCarSystem">
+				        <el-checkbox-button v-for="(item,ind) in CarSeries" :label="item.label" :key="ind">{{item.name}}</el-checkbox-button>
+				    </el-checkbox-group>
 				</el-form-item>
 				<el-form-item label="图标" prop="logo">
 					<el-upload
@@ -131,18 +167,6 @@
 					  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
 					</el-upload>
 					<!--<el-input v-model="editForm.headImg" auto-complete="off"></el-input>-->
-				</el-form-item>
-				<el-form-item label="长" prop="length">
-					<el-input v-model="addForm.length" auto-complete="off"></el-input>mm
-				</el-form-item>
-				<el-form-item label="宽" prop="width">
-					<el-input v-model="addForm.width" auto-complete="off"></el-input>mm
-				</el-form-item>
-				<el-form-item label="高" prop="height">
-					<el-input v-model="addForm.height" auto-complete="off"></el-input>mm
-				</el-form-item>
-				<el-form-item label="轴距" prop="Wheelbase">
-					<el-input v-model="addForm.Wheelbase" auto-complete="off"></el-input>mm
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -157,16 +181,23 @@
 <script>
 	import Uediter from '@/components/ue.vue'
 	import util from '../../common/js/util'
+	import Bydialog from '../../components/dialog.vue'
 	//import NProgress from 'nprogress'
-	import { getUserListPage } from '../../api/api';
+	import { article ,articleAdd,carModel,tagGroup} from '../../api/api';
 	const channelOptions = ['频道1', '频道2', '频道3', '频道4'];
 	const labelOptions = ['标签1', '标签2', '标签3', '标签4'];
 	export default {
+		components: {Bydialog},
 		data() {
 			return {
 				filters: {
 					name: ''
 				},
+				imglist:[],
+				CarSeries:[],
+				taglist:[],
+				innerVisible:false,
+				value8:'',
 				routerLink : '/graphicediting',
 				users: [],
 				listLoading: false,
@@ -180,17 +211,14 @@
 				checked: true,
 				checke:true,
 				sels: [],//列表选中列
-				options: [{
-		          value: '选项1',
-		          label: '全部'
+				options: [ {
+		          value: '2',
+		          label: '视频'
 		        }, {
-		          value: '选项2',
-		          label: '原创'
-		        }, {
-		          value: '选项3',
-		          label: '转载'
+		          value: '1',
+		          label: '文章'
 		        }],
-		        value8: '',
+		        bizType: '',
 		        statusvalue:"",
 		        statusoptions:[{
 		          value: '选项1',
@@ -219,15 +247,20 @@
 				addFormVisible: false,//新增界面是否显示
 				addLoading: false,
 				addFormRules: {
-					name: [
-						{ required: true, message: '请输入作者名称', trigger: 'blur' }
-					]
+//					name: [
+//						{ required: true, message: '请输入作者名称', trigger: 'blur' }
+//					]
 				},
 				//新增界面数据
 				addForm: {
-					name: '',
-					birth: '',
-					addr: ''
+					bizType: '',
+					title: '',
+					brief:'',
+					posters:'',
+					source:'',
+					duration:'',
+					videoUrl:'',
+					vid:''
 				},
 				
 			}
@@ -235,6 +268,36 @@
 		methods: {
 			beforeAvatarUpload() {},
 			handleAvatarSuccess() {},
+			//获取标签
+			getTagGroup(){
+				let para = {
+					pageNum: this.page,
+					pageSize: this.pagesize
+				};
+				this.listLoading = true;
+				//NProgress.start();
+				tagGroup(para).then((res) => {
+					this.total = res.data.result.total;
+					this.CarSeries = res.data.result.list;
+					this.listLoading = false;
+					//NProgress.done();
+				});
+			},
+			//获取车系
+			getAboutCarSerie(){
+				let para = {
+					pageNum: this.page,
+					pageSize: this.pagesize
+				};
+				this.listLoading = true;
+				//NProgress.start();
+				carModel(para).then((res) => {
+					this.total = res.data.result.total;
+					this.CarSeries = res.data.result.list;
+					this.listLoading = false;
+					//NProgress.done();
+				});
+			},
 			onSubmit() {
 				console.log('submit!');
 			},
@@ -242,17 +305,21 @@
 				this.page = val;
 				this.getUsers();
 			},
+			childEventHandler () {
+				this.imglist = this.$store.state.imgItem
+			},
 			//获取用户列表
 			getUsers() {
 				let para = {
-					page: this.page,
-					name: this.filters.name
+					pageNum: this.page,
+					pageSize: this.pagesize
 				};
 				this.listLoading = true;
+				let params = new URLSearchParams();
 				//NProgress.start();
-				getUserListPage(para).then((res) => {
-					this.total = res.data.total;
-					this.users = res.data.users;
+				article(para).then((res) => {
+					this.total = res.data.result.total;
+					this.users = res.data.result.list;
 					this.listLoading = false;
 					//NProgress.done();
 				});
@@ -276,14 +343,26 @@
 			},
 			//新增
 			addSubmit: function () {
+				console.log(this.addForm.bizType)
 				this.$refs.addForm.validate((valid) => {
 					if (valid) {
 						this.$confirm('确认提交吗？', '提示', {}).then(() => {
 							this.addLoading = true;
 							//NProgress.start();
 							let para = Object.assign({}, this.addForm);
-							para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-							addUser(para).then((res) => {
+							let params = new URLSearchParams();
+							if(this.addForm.bizType==2){
+								params.append("bizType",this.addForm.bizType)
+								params.append("title",this.addForm.title)
+								params.append("videoUrl",this.addForm.videoUrl)
+								params.append("posters",this.imglist[0])
+								params.append("source",this.addForm.source)
+								params.append("duration",this.addForm.duration)
+								params.append("vid",this.addForm.vid)
+//								params.append("brief",this.addForm.brief)
+							}
+							
+							articleAdd(params).then((res) => {
 								this.addLoading = false;
 								//NProgress.done();
 								this.$message({
@@ -327,6 +406,10 @@
 				});
 			},
 			
+		},
+		created(){
+			this.getAboutCarSerie();
+			this.getTagGroup();
 		},
 		mounted() {
 			this.getUsers();

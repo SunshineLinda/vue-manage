@@ -32,3 +32,9 @@ export const delPic = params => { return axios.post(`${list}/spi/resourceLib/del
 export const carBrand = params => { return axios.get(`${list}/spi/carBrand/list`, { params: params }); };
 export const carModel = params => { return axios.get(`${list}/spi/carModel/list`, { params: params }); };
 export const tagGroup = params => { return axios.get(`${list}/spi/tagGroup/list`, { params: params }); };
+export const tagGroupAdd = params => { return axios.post(`${list}/spi/tagGroup/add`,params).then(res => res.data); };
+export const carBrandAdd = params => { return axios.post(`${list}/spi/carBrand/add`,params).then(res => res.data); };
+export const carModelAdd = params => { return axios.post(`${list}/spi/carModel/add`,params).then(res => res.data); };
+export const article = params => { return axios.get(`${list}/spi/article/list`,{ params: params }); };
+export const articleAdd = params => { return axios.post(`${list}/spi/article/add`,params).then(res => res.data); };
+

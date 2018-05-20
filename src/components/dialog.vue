@@ -165,14 +165,27 @@
 		},
         getPic(item,ind){
 			let _mData =JSON.parse( JSON.stringify(this.picData));
-				_mData[ind].checked = _mData[ind].checked ? false :'checked'
+			let Path=this.$route.path;
+				_mData[ind].checked = _mData[ind].checked ? false :'checked';
 				this.picData = _mData;
-				if(_mData[ind].checked) {
-					this.imgItem.push(item.link)
-				}else {
-					var index = this.imgItem.indexOf(item.link);
-					if (index > -1) {
-						this.imgItem.splice(index, 1);
+				if(Path=='/carbrandManagement' && this.imgItem.length<1){
+					if(_mData[ind].checked) {
+						this.imgItem.push(item.link);
+						console.log(item.link)
+					}else {
+						var index = this.imgItem.indexOf(item.link);
+						if (index > -1) {
+							this.imgItem.splice(index, 1);
+						}
+					}
+				}else{
+					if(_mData[ind].checked) {
+						this.imgItem.push(item.link);
+					}else {
+						var index = this.imgItem.indexOf(item.link);
+						if (index > -1) {
+							this.imgItem.splice(index, 1);
+						}
 					}
 				}
 				this.$emit('childevent' , this.imgItem)
@@ -224,82 +237,18 @@
 			this.sels = sels;
 		},
 		getData(){
-
-			let mock = {
-				"code":200,
-				"msg":"",
-				"result":{
-					"endRow":25,
-					"firstPage":1,
-					"hasNextPage":false,
-					"hasPreviousPage":false,
-					"isFirstPage":true,
-					"isLastPage":true,
-					"lastPage":1,
-					"list":[
-						{
-							"cTime":1526461590000,
-							"link":"http://s.img.owlcar.com/20180516/1526461590615.png",
-							"rId":186,
-							"rTag":"3",
-							"rType":1,
-							"sysUserId":1
-						},
-						{
-							"cTime":1526462939000,
-							"link":"http://s.img.owlcar.com/20180516/1526462939682.png",
-							"rId":190,
-							"rTag":"嗯嗯",
-							"rType":1,
-							"sysUserId":1
-						},
-						{
-							"cTime":1526462939000,
-							"link":"http://s.img.owlcar.com/20180516/1526462939706.png",
-							"rId":192,
-							"rTag":"嗯嗯",
-							"rType":1,
-							"sysUserId":1
-						},
-						{
-							"cTime":1526462939000,
-							"link":"http://s.img.owlcar.com/20180516/1526462939728.png",
-							"rId":194,
-							"rTag":"嗯嗯",
-							"rType":1,
-							"sysUserId":1
-						},
-						{
-							"cTime":1526462939000,
-							"link":"http://s.img.owlcar.com/20180516/1526462939739.jpg",
-							"rId":195,
-							"rTag":"嗯嗯",
-							"rType":1,
-							"sysUserId":1
-						},
-						{
-							"cTime":1526464276000,
-							"link":"http://s.img.owlcar.com/20180516/1526464276524.jpg",
-							"rId":196,
-							"rTag":"333",
-							"rType":1,
-							"sysUserId":1
-						}
-					]
-				}
-			}	
-		this.total = mock.result.total;
-		this.picData = mock.result.list
-		this.picData.map((i,v)=>{
-			i.checked = false;
-		})
-			// picSource(
-			// 	{"pageNum":this.page,"pageSize":this.pagesize,"rType":1}
-			// ).then(res => {
-			// 	this.total = res.data.result.total;
-			// 	this.picData=res.data.result.list;
-				
-			// })
+//		this.picData.map((i,v)=>{
+//			i.checked = false;
+//		})
+			 picSource(
+			 	{"pageNum":this.page,"pageSize":this.pagesize,"rType":1}
+			 ).then(res => {
+			 	this.total = res.data.result.total;
+			 	this.picData=res.data.result.list;
+				this.picData.map((i,v)=>{
+					i.checked = false;
+				})
+			 })
 		},
 		fileImage(e){
 			this.filelen= e.target.files.length; 
@@ -307,7 +256,6 @@
 	},
 		//新增
 		addSubmit: function (tg) {
-			console.log(this.filelen)
 			let formData = new FormData(); 
 			for (var i=0;i<this.filelen;i++) {
 				formData.append('files',this.files[i]);
@@ -375,7 +323,7 @@
             }    
 		} ,
 		picData() {
-			console.log('操作图片')
+//			console.log('操作图片')
 		}   
     },    
     created(){

@@ -21,7 +21,7 @@
 			        <img  :src="scope.row.pic" alt="" style="width:100%;height:100%">
 			    </template>
 			</el-table-column>
-			<el-table-column prop="age" label="状态" width="100">
+			<el-table-column prop="state" label="状态" width="100">
 				<template slot-scope="scope">
 					<span v-if="scope.row.state==1">启用</span>
 					<span v-if="scope.row.state==0">停用</span>
@@ -74,21 +74,21 @@
 		<!--新增界面-->
 		<el-dialog title="新增" v-model="addFormVisible" :visible.sync="addFormVisible" :close-on-click-modal="false">
 			<el-dialog  width="100%" :visible.sync="innerVisible" append-to-body>
-		   	  <Bydialog v-on:listen="formChild" @childevent="childEventHandler"></Bydialog>
+		   	  <Bydialog @childevent="childEventHandler"></Bydialog>
 		    </el-dialog>
 			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-				<el-form-item label="品牌名" prop="name">
-					<el-input v-model="addForm.name" auto-complete="off"></el-input>
+				<el-form-item label="品牌名" prop="brandName">
+					<el-input v-model="addForm.brandName" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="首字母" prop="letter">
 					<el-input v-model="addForm.letter" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="logo" prop="logo">
 					<p @click="innerVisible = true">+</p>
-					<img :src="item" alt="" v-for="item in imglist" :key="item" style="width:50px;height:50px">
+					<img :src="item" alt="" v-for="item in imglist" :key="item" style="width:50px;height:50px;padding-right:10px;">
 				</el-form-item>
 				<el-form-item label="状态" prop="state">
-					<el-select v-model="state" filterable placeholder="状态">
+					<el-select v-model="addForm.state" filterable placeholder="状态">
 					    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
 					</el-select>
 					<!--<el-input v-model="addForm.state" auto-complete="off"></el-input>-->
@@ -105,9 +105,10 @@
 <script>
 	import util from '../../common/js/util'
 	import Bydialog from '../../components/dialog.vue'
+	import axios from "axios"
 	//import NProgress from 'nprogress'
 
-	import { getUserListPage,carBrand} from '../../api/api';
+	import { getUserListPage,carBrand,carBrandAdd} from '../../api/api';
 	export default {
 		components: {Bydialog},
 		data() {
@@ -153,7 +154,7 @@
 				addLoading: false,
 				innerVisible:false,
 				addFormRules: {
-					name: [
+					brandName: [
 						{ required: true, message: '请输入品牌名称', trigger: 'blur' }
 					],
 					letter: [
@@ -165,7 +166,7 @@
 				},
 				//新增界面数据
 				addForm: {
-					name: '',
+					brandName: '',
 					letter: '',
 					state: ''
 				}
@@ -173,7 +174,7 @@
 		},
 		watch: {
 			imglist() {
-				console.log(this.imglist)
+//				console.log(this.imglist)
 			}
 		},
 		methods: {
@@ -187,9 +188,6 @@
 				this.page = val;
 				this.getCarBrandList();
 				
-			},
-			formChild(d){
-				console.log(d)	
 			},
 			//获取用户列表
 			getCarBrandList() {
@@ -219,10 +217,8 @@
 				this.addFormVisible = true;
 				this.addForm = {
 					name: '',
-					sex: -1,
-					age: 0,
-					birth: '',
-					addr: ''
+					letter: '',
+					state:'',
 				};
 			},
 			//编辑
@@ -255,10 +251,16 @@
 					if (valid) {
 						this.$confirm('确认提交吗？', '提示', {}).then(() => {
 							this.addLoading = true;
+//							let para={"name":this.addForm.brandName,"letter":this.addForm.letter.state,"state":this.addForm.state,"pic":"http://s.img.owlcar.com/20180516/1526462939739.jpg"}
+							let params = new URLSearchParams();
 							//NProgress.start();
-							let para = Object.assign({}, this.addForm);
-							para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-							addUser(para).then((res) => {
+//							let para = Object.assign({}, this.addForm);
+				params.append("letter",this.addForm.letter);
+				params.append("state",this.addForm.state);
+				params.append("pic","http://s.img.owlcar.com/20180516/1526462939739.jpg");
+				params.append("name",this.addForm.brandName);
+//				axios.post("http://47.104.208.252/spi/carBrand/add",params).then((res)=>{
+					carBrandAdd(para).then((res) => {
 								this.addLoading = false;
 								//NProgress.done();
 								this.$message({
@@ -267,7 +269,7 @@
 								});
 								this.$refs['addForm'].resetFields();
 								this.addFormVisible = false;
-								this.getUsers();
+								this.getCarBrandList();
 							});
 						});
 					}
@@ -295,7 +297,7 @@
 							message: '删除成功',
 							type: 'success'
 						});
-						this.getUsers();
+						this.getCarBrandList();
 					});
 				}).catch(() => {
 
